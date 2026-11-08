@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext } from 'react';
 
 export const AuthContext = createContext();
@@ -19,12 +18,16 @@ export function AuthProvider({ children }) {
         setUser(null);
     };
 
+    const isAdmin = () => {
+        return user?.role === 'admin';
+    };
+
     const value = {
         user,
         login,
         logout,
         isAuthenticated: user !== null,
-        isAdmin: user?.role === 'admin'
+        isAdmin
     };
 
     return (

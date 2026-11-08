@@ -1,28 +1,54 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useAuth } from './AuthContext';
 
-// ⚠️ SECURITY ISSUE: This context is shared globally with no user authentication
-// All users see the same saved articles!
 const ArticlesContext = createContext();
 
 export function ArticlesProvider({ children }) {
-  const [savedArticles, setSavedArticles] = useState([]);
+  const [savedArticles, setSavedArticles] = useState({});
+  const { user } = useAuth();
+
+  const username = user?.username;
 
   const saveArticle = (article) => {
+    if (!username) return;
+
     setSavedArticles(prev => {
-      // Check if article is already saved
-      if (prev.find(a => a.url === article.url)) {
+      const userArticles = prev[username] || [];
+
+      if (userArticles.find(a => a.url === article.url)) {
         return prev;
       }
-      return [...prev, article];
+
+      return {
+        ...prev,
+        [username]: [...userArticles, article]
+      };
     });
   };
 
   const removeArticle = (url) => {
-    setSavedArticles(prev => prev.filter(a => a.url !== url));
+    if (!username) return;
+
+    setSavedArticles(prev => ({
+      ...prev,
+      [username]: (prev[username] || []).filter(a => a.url !== url)
+    }));
   };
 
   const isArticleSaved = (url) => {
-    return savedArticles.some(a => a.url === url);
+    if (!username) return false;
+
+    return (savedArticles[username] || []).some(a => a.url === url);
+  };
+
+  const getUserSavedArticles = () => {
+    if (!username) return [];
+
+    return savedArticles[username] || [];
+  };
+
+  const getAllUserArticles = () => {
+    return savedArticles;
   };
 
   return (
@@ -31,7 +57,9 @@ export function ArticlesProvider({ children }) {
         savedArticles, 
         saveArticle, 
         removeArticle, 
-        isArticleSaved 
+        isArticleSaved,
+        getUserSavedArticles,
+        getAllUserArticles
       }}
     >
       {children}

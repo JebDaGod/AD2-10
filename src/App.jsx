@@ -7,6 +7,7 @@ import SearchPage from './pages/SearchPage';
 import SavedArticlesPage from './pages/SavedArticlesPage';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -26,6 +27,14 @@ function App() {
                 }
               />
               <Route path="/login" element={<Login />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Layout>
         </BrowserRouter>
